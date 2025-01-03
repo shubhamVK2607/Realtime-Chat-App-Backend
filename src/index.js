@@ -18,8 +18,8 @@ app.use(
 );
 dotenv.config();
 
-app.use("/api/auth", authRoutes);
-app.use("/api/message", messageRoutes);
+app.use("/auth", authRoutes);
+app.use("/message", messageRoutes);
 
 connectDB
   .then(() => {
