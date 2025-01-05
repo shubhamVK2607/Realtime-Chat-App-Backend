@@ -3,15 +3,31 @@ import Message from "../models/message.model.js";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import ConnectionRequest from "../models/connectionRequest.model.js";
+
+const USER_SAFE_DATA = ["fullName", "photoURL"];
 
 export const getUsersForSidebar = async (req, res) => {
   try {
-    const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({
-      _id: { $ne: loggedInUserId },
-    }).select("-password");
+    const loggedInUser = req.user;
 
-    res.status(200).json(filteredUsers);
+    const connectedUser = await ConnectionRequest.find({
+      status: "accepted",
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    })
+      .populate("fromUserId", USER_SAFE_DATA)
+      .populate("toUserId", USER_SAFE_DATA);
+
+    const data = connectedUser.map((row) =>
+      row.fromUserId._id.toString() === loggedInUser._id.toString()
+        ? row.toUserId
+        : row.fromUserId
+    );
+
+    res.status(200).json({
+      message: "data fetched successfully",
+      data: { length: data.length, data },
+    });
   } catch (error) {
     console.error("Error in getUsersForSidebar: ", error.message);
     res.status(500).json({ error: "Internal server error" });
