@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import messageRoutes from "./routes/message.route.js";
 import connectionRequestRoutes from "./routes/connectionRequest.route.js";
+import postRoutes from "./routes/post.Route.js";
 import userRoutes from "./routes/user.Route.js";
 import cors from "cors";
 import { app, server } from "./lib/socket.js";
@@ -24,6 +25,7 @@ app.use("/auth", authRoutes);
 app.use("/request", connectionRequestRoutes);
 app.use("/message", messageRoutes);
 app.use("/user", userRoutes);
+app.use("/post", postRoutes);
 
 connectDB
   .then(() => {

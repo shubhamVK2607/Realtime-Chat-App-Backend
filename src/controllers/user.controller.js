@@ -62,7 +62,6 @@ export const getUsersForFeed = async (req, res) => {
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
     }).select(["fromUserId", "toUserId"]);
 
-    console.log(connectedUsers);
     const hiddenUsersFromFeedId = connectedUsers.flatMap((connection) => [
       connection.fromUserId._id.toString(),
       connection.toUserId._id.toString(),

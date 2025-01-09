@@ -11,6 +11,6 @@ const router = express.Router();
 
 router.get("/requests/received", protectedRoute, getAllConnectionRequests);
 router.get("/connections", protectedRoute, getAllConnections);
-router.get("/feed", protectedRoute, getUsersForFeed);
+router.get("/connect", protectedRoute, getUsersForFeed);
 
 export default router;
