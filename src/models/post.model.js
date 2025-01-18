@@ -16,6 +16,11 @@ const postSchema = new Schema(
     image: {
       type: String,
     },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId
+      },
+    ],
   },
   {
     timestamps: true,

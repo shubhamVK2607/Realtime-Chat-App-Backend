@@ -46,3 +46,40 @@ export const getAllPosts = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+export const updateLikes = async (req, res) => {
+  try {
+    const { postId } = req.params; // Get postId from params
+    const loggedInUser = req.user._id; // Logged-in user's ID
+
+    // Find the post by its ID
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Check if the user ID already exists in the likes array
+    const userIndex = post.likes.indexOf(loggedInUser);
+
+    if (userIndex === -1) {
+      // If the user is not in the likes array, add them
+      post.likes.push(loggedInUser);
+    } else {
+      // If the user is already in the likes array, remove them
+      post.likes.splice(userIndex, 1);
+    }
+
+
+    // Save the updated post
+    await post.save();
+    const populatedPost = await post.populate("fromId", ["fullName", "photoURL"]);
+
+    res.status(200).json({ message: "Likes updated", data: populatedPost });
+    
+  } catch (error) {
+    console.error("Error in updateLikes controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
