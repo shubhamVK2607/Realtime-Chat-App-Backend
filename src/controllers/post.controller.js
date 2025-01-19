@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js";
 import cloudinary from "../lib/cloudinary.js";
+import User from "../models/user.model.js";
 
 export const addPost = async (req, res) => {
   try {
@@ -38,6 +39,8 @@ export const getAllPosts = async (req, res) => {
       .populate("fromId", ["fullName", "photoURL"])
       .sort({ createdAt: -1 });
 
+
+
     res
       .status(200)
       .json({ data: posts, message: "Posts Fetched Successfully" });
@@ -46,7 +49,6 @@ export const getAllPosts = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 export const updateLikes = async (req, res) => {
   try {
@@ -71,15 +73,57 @@ export const updateLikes = async (req, res) => {
       post.likes.splice(userIndex, 1);
     }
 
-
     // Save the updated post
     await post.save();
-    const populatedPost = await post.populate("fromId", ["fullName", "photoURL"]);
+    const populatedPost = await post.populate("fromId", [
+      "fullName",
+      "photoURL",
+    ]);
 
     res.status(200).json({ message: "Likes updated", data: populatedPost });
-    
   } catch (error) {
     console.error("Error in updateLikes controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const addComments = async (req, res) => {
+  try {
+    const { postId } = req.params; // Get postId from params
+    const loggedInUserId = req.user._id; // Logged-in user's ID
+    const { text } = req.body;
+
+    // Find the post by its ID
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const loggedInUser = await User.findById(loggedInUserId).select(
+      "fullName photoURL"
+    );
+    post.comments.push({
+      user: {
+        userId: loggedInUserId,
+        fullName: loggedInUser.fullName,
+        photoURL: loggedInUser.photoURL,
+      },
+
+      text,
+    });
+
+    await post.save();
+
+    const populatedPost = await post.populate("fromId", [
+      "fullName",
+      "photoURL",
+    ]);
+
+
+    res.status(200).json({ message: "Comments Added", data: populatedPost});
+  } catch (error) {
+    console.error("Error in Add Comments controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
